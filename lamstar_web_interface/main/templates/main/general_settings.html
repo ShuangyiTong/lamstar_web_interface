@@ -1,0 +1,68 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block css %}
+    <!-- bootstrap-wysiwyg -->
+    <link href="{% static 'main/vendors/google-code-prettify/bin/prettify.min.css' %}" rel="stylesheet">
+    <!-- Select2 -->
+    <link href="{% static 'main/vendors/select2/dist/css/select2.min.css' %}" rel="stylesheet">
+    <!-- Switchery -->
+    <link href="{% static 'main/vendors/switchery/dist/switchery.min.css' %}" rel="stylesheet">
+    <!-- starrr -->
+    <link href="{% static 'main/vendors/starrr/dist/starrr.css' %}" rel="stylesheet">
+    <!-- bootstrap-daterangepicker -->
+    <link href="{% static 'main/vendors/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block js %}
+    <!-- bootstrap-wysiwyg -->
+    <script src="{% static 'main/vendors/bootstrap-wysiwyg/js/bootstrap-wysiwyg.min.js' %}"></script>
+    <script src="{% static 'main/vendors/jquery.hotkeys/jquery.hotkeys.js' %}"></script>
+    <script src="{% static 'main/vendors/google-code-prettify/src/prettify.js' %}"></script>
+    <!-- jQuery Tags Input -->
+    <script src="{% static 'main/vendors/jquery.tagsinput/src/jquery.tagsinput.js' %}"></script>
+    <!-- Switchery -->
+    <script src="{% static 'main/vendors/switchery/dist/switchery.min.js' %}"></script>
+    <!-- Select2 -->
+    <script src="{% static 'main/vendors/select2/dist/js/select2.full.min.js' %}"></script>
+    <!-- Autosize -->
+    <script src="{% static 'main/vendors/autosize/dist/autosize.min.js' %}"></script>
+    <!-- jQuery autocomplete -->
+    <script src="{% static 'main/vendors/devbridge-autocomplete/dist/jquery.autocomplete.min.js' %}"></script>
+    <!-- starrr -->
+    <script src="{% static 'main/vendors/starrr/dist/starrr.js' %}"></script>
+    <!-- bootstrap-daterangepicker -->
+    <script src="{% static 'main/vendors/moment/min/moment.min.js' %}"></script>
+    <script src="{% static 'main/vendors/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+{% endblock %}
+
+{% block page_content %}
+    <div class="right_col" role="main">
+        <div class="col-md-12 col-xs-12">
+            <p style="font-size: 22px"> General Settings </p>
+            <div class="col-md-1 col-xs-12"></div>
+            <div class="col-md-6 col-xs-12">
+                <div class="form-group">
+                    <div class="clearfix"></div>                        
+                    <label class="col-md-6 col-sm-3 col-xs-12 control-label">Preferred communication method
+                        <br>
+                        <small class="text-navy">How do you want this platform communicate with network processes</small>
+                    </label>
+                    <div class="col-md-6 col-sm-9 col-xs-12">
+                        <div class="radio">
+                        <label>
+                            <input type="radio" class="flat" checked name="iCheck"> Script/File 
+                        </label>
+                        </div>
+                        <div class="radio">
+                        <label>
+                            <input type="radio" class="flat" name="iCheck"> TCP/IP 
+                        </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

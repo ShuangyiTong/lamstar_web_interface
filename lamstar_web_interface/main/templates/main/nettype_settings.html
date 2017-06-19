@@ -1,0 +1,217 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block css %}
+    <!-- Select2 -->
+    <link href="{% static 'main/vendors/select2/dist/css/select2.min.css' %}" rel="stylesheet">
+    <!-- Switchery -->
+    <link href="{% static 'main/vendors/switchery/dist/switchery.min.css' %}" rel="stylesheet">
+    <!-- starrr -->
+    <link href="{% static 'main/vendors/starrr/dist/starrr.css' %}" rel="stylesheet">
+    <!-- bootstrap-daterangepicker -->
+    <link href="{% static 'main/vendors/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+    <!-- Datatables -->
+    <link href="{% static 'main/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'main/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'main/vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'main/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'main/vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block js %}    
+    <script src="{% static 'main/vendors/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-buttons/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-responsive/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-scroller/js/dataTables.scroller.min.js' %}"></script>  
+    <!-- jQuery Tags Input -->
+    <script src="{% static 'main/vendors/jquery.tagsinput/src/jquery.tagsinput.js' %}"></script>
+    <!-- Switchery -->
+    <script src="{% static 'main/vendors/switchery/dist/switchery.min.js' %}"></script>
+    <!-- Select2 -->
+    <script src="{% static 'main/vendors/select2/dist/js/select2.full.min.js' %}"></script>
+    <!-- Autosize -->
+    <script src="{% static 'main/vendors/autosize/dist/autosize.min.js' %}"></script>
+    <!-- jQuery autocomplete -->
+    <script src="{% static 'main/vendors/devbridge-autocomplete/dist/jquery.autocomplete.min.js' %}"></script>
+    <!-- starrr -->
+    <script src="{% static 'main/vendors/starrr/dist/starrr.js' %}"></script>
+    <!-- bootstrap-daterangepicker -->
+    <script src="{% static 'main/vendors/moment/min/moment.min.js' %}"></script>
+    <script src="{% static 'main/vendors/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+
+    <script>
+        $("#submit_new_network_type").submit(function (event) {
+            NProgress.start();
+            var $form = $(this);
+            event.preventDefault();
+            $.ajax({
+                url: "{% url 'main:new-type-of-network' %}" ,
+                data: {
+                    'type_name': $form.find( "input[name='type_name']" ).val(),
+                    'exe_path' : $form.find( "input[name='exe_path']" ).val(),
+                    'cmd_lang' : $form.find( "input[name='cmd_lang']" ).val(),
+                    'cmd_lang_def' : $form.find( "input[name='cmd_lang_def']" ).val(),
+                    'tcp_ip' : $form.find( "input[name='tcp_ip']" )[0].checked,
+                    'cons_para' : $form.find( "input[name='para']" ).val()
+                },
+                dataType: 'json',
+                success: function(data) {
+                    if(!data.success) {
+                        alert("Unknown error, create new network type failed");
+                    }
+                    else {
+                        location.reload()
+                    }
+                } 
+            });
+            NProgress.done();
+        });			
+        function init_TagsInput() {
+				  
+            if(typeof $.fn.tagsInput !== 'undefined'){	
+                
+            $('#constructing_para').tagsInput({
+                width: "500px"
+            });
+            
+            }
+            
+        };
+    </script>
+{% endblock %}
+
+{% block page_content %}
+    <div class="right_col" role="main">    
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                    <h2>All Network Types<small>local</small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                        <li class="dropdown">
+                        <a href="#newnettype" data-toggle="collapse" role="button" aria-expanded="true"><i class="fa fa-plus"></i></a>
+                        </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                    </div>
+                    <div id="newnettype" class="collapse">
+                        <div class="row">
+                            <div class="x_panel">
+                                <div class="x_title">
+                                <h2>Create A New type of Network</h2>
+                                <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
+                                <br />
+                                <form class="form-horizontal form-label-left" id="submit_new_network_type" method="POST">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Network type name</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input required type="text" name="type_name" class="form-control" placeholder="e.g. LAMSTAR">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Executable path</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input required type="text" name="exe_path" class="form-control" placeholder="e.g. main/bin/lam-F">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Command language</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input required type="text" name="cmd_lang" class="form-control" placeholder="e.g. LightScript">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-5 col-sm-3 col-xs-12">Command language definition XML path</label>
+                                        <div class="col-md-7 col-sm-9 col-xs-12">
+                                            <input type="text" name="cmd_lang_def" class="form-control" placeholder="optional">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">TCP/IP enabled</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                        <div class="checkbox">
+                                            <input type="checkbox" name="tcp_ip" class="js-switch" checked="checked">
+                                        </div>
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Constructing parameters</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input id="constructing_para" type="text" name="para" class="tags form-control" value="" />
+                                            <div id="suggestions-container" style="position: relative; float: left; width: 250px; margin: 10px;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
+                                        <button type="reset" class="btn btn-primary">Reset</button>
+                                        <button type="submit" class="btn btn-success">Submit</button>
+                                        </div>
+                                    </div>
+                                    <div id="submit_new_network_type_status">
+                                    </div>
+                                </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="x_content">
+                        <table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <td>
+                                        Name
+                                    </td>
+                                    <td>
+                                        Excutable path
+                                    </td>
+                                    <td>
+                                        Command language
+                                    </td>
+                                    <td>
+                                        TCP/IP enabled
+                                    </td>
+                                    <td>
+                                        Details
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for network_type in all_network_types %}
+                                    <tr>
+                                        <td>
+                                            {{network_type.type_name}}
+                                        </td>
+                                        <td>
+                                            {{network_type.bin_path}}
+                                        </td>
+                                        <td>
+                                            {{network_type.cmd_lang}}
+                                        </td>
+                                        <td>
+                                            {{network_type.tcp_ip_enabled}}
+                                        </td>
+                                        <td>
+                                            View Details
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

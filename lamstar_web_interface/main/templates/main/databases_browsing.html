@@ -1,0 +1,326 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block css %}
+    <!-- Switchery -->
+    <link href="{% static 'main/vendors/switchery/dist/switchery.min.css' %}" rel="stylesheet">
+    <!-- Datatables -->
+    <link href="{% static 'main/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'main/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'main/vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'main/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'main/vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'main/vendors/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-buttons/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-buttons/js/buttons.flash.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-buttons/js/buttons.html5.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-buttons/js/buttons.print.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-responsive/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js' %}"></script>
+    <script src="{% static 'main/vendors/datatables.net-scroller/js/dataTables.scroller.min.js' %}"></script>
+    <script src="{% static 'main/vendors/jszip/dist/jszip.min.js' %}"></script>
+    <script src="{% static 'main/vendors/pdfmake/build/pdfmake.min.js' %}"></script>
+    <script src="{% static 'main/vendors/pdfmake/build/vfs_fonts.js' %}"></script>
+    <script src="{% static 'main/vendors/fastclick/lib/fastclick.js' %}"></script>
+    <!-- Switchery -->
+    <script src="{% static 'main/vendors/switchery/dist/switchery.min.js' %}"></script>
+    <script>
+        $("#submit-newdatabase-info").submit(function (event) {
+            NProgress.start();
+            var $form = $(this);
+            event.preventDefault();
+            $.ajax({
+                url: "{% url 'main:create-database' %}" ,
+                data: $form.serialize(),
+                dataType: 'json',
+                success: function(data) {
+                    $("#create_database_return").hide().html(data.status).slideToggle();
+                    // add rows in the future
+                } 
+            });
+            NProgress.done();
+        });	        
+        $( ".view_database_details" ).click(function() {
+            NProgress.start();
+            var int_id = $(this).val();
+            var button_id = "#button_"+int_id;
+            if($(button_id).text()=="Hide Details") {
+                var row_id = "#expanded_"+int_id;
+                $(row_id).remove();
+                $(button_id).html("View Details");
+                NProgress.done();
+            } else {
+                $.ajax({
+                    url: "{% url 'main:database-details' %}" ,
+                    data: {
+                        "internal_id" : $(this).val()
+                    },
+                    success: function(data) {
+                        var row_id = "#database_"+int_id;
+                        $(row_id).after(data);
+                        $(button_id).html("Hide Details");
+                    },
+                    error: function(xhr, ajaxOptions, thrownError) {
+                        $("#get_database_detials_failed").modal('show');
+                    }    
+                });
+                NProgress.done();
+            }
+        });
+        $( ".show_tables" ).click(function() {
+            NProgress.start();
+            var int_id = $(this).val();
+            $.ajax({
+                url: "{% url 'main:table-list' %}" ,
+                data: {
+                    "internal_id" : $(this).val()
+                },
+                success: function(data) {
+                    $("#table_list").slideToggle("slow").html(data).slideToggle("slow");
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    $("#get_database_detials_failed").modal('show');
+                }    
+            });
+            NProgress.done();
+        });
+        $( ".close_connection" ).click(function() {
+            NProgress.start();
+            var int_id = $(this).val();
+            $.ajax({
+                url: "{% url 'main:close-db-connection' %}" ,
+                data: {
+                    "internal_id" : int_id
+                },
+                success: function(data) {
+                    if (data.status=='success') {
+                        $("#close_conn_"+int_id).remove();
+                    } else {
+                        $("#connection_close_failure").modal('show');
+                    }
+                }
+            });
+            NProgress.done();
+        });
+    </script>
+{% endblock %}
+
+{% block page_content %}
+<div class="right_col" role="main">
+    <div id="top_tiles" class="tile_count col-md-6 col-sm-6 col-xs-12">
+        <div class="col-md-3 col-sm-4 col-xs-6 tile_stats_count">
+            <span class="count_top"><i class="fa fa-database"></i> Total Databases Availiable</span>
+            <div class="count">{{ all_databases.count }}</div>
+            <span class="count_bottom"><i class="green">{{ active_connections|length }} </i> Online</span>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-6 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+            <h2>Online Databases <small>main/databases</small></h2>
+            <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Unique ID</th>
+                    <th>Operation</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for conn in active_connections %}
+                        <tr id="close_conn_{{ conn }}">
+                            <td>
+                                {{ conn }}
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm close_connection" value="{{ conn }}"> 
+                                    Close </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+            <h2>Availiable Databases<small>main/databases</small></h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+                <li class="dropdown">
+                <a href="#newnet" data-toggle="collapse" role="button" aria-expanded="true"><i class="fa fa-plus"></i></a>
+                </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+            </div>
+            <div id="newnet" class="collapse">
+                <div class="row">
+                    <div class="x_content">
+                    <div class="x_panel">
+                        <div class="x_title">
+                        <h2>Create New Database <small>main/databases</small></h2>
+                        <div class="clearfix"></div>
+                        </div>
+                        <form id="submit-newdatabase-info" class="form-horizontal form-label-left">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12">Choose Database Type</label>
+                            <div class="col-md-8 col-sm-9 col-xs-12">
+                            <select name="type_name" class="form-control" id="choose_database_type">
+                                <option>SQLite3</option>
+                            </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12">Name</label>
+                            <div class="col-md-8 col-sm-9 col-xs-12">
+                                <input name="name" class="form-control" placeholder="optional">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12">Comments</label>
+                            <div class="col-md-8 col-sm-9 col-xs-12">
+                                <textarea name="comments" class="form-control" rows="3" placeholder="optional"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4 col-sm-3 col-xs-3 pull-right">
+                                <button type="submit" class="btn btn-success pull-right">Create</button>
+                                <button type="reset" class="btn btn-warning pull-right">Reset</button>
+                            </div>
+                        </div>
+                        </form> 
+                        <div id="create_database_return">
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <div class="x-content">
+                <table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Unique ID
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Last Modified
+                            </td>
+                            <td>
+                                Details
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for database in all_databases %}
+                            <tr id="database_{{ database.internal_id }}">
+                                <td>
+                                    {{database.displayed_name}}
+                                </td>
+                                <td>
+                                    {{database.internal_id}}
+                                </td>
+                                <td>
+                                    {{database.database_type}}
+                                </td>
+                                <td>
+                                    {{database.last_modified}}
+                                </td>
+                                <td>
+                                    <button id="button_{{ database.internal_id }}" class="btn btn-success btn-xs view_database_details" value="{{ database.internal_id }}"> 
+                                        View Details </button>
+                                    <button id="showtable_{{ database.internal_id }}" class="btn btn-success btn-xs show_tables" value="{{ database.internal_id }}"> 
+                                        View Tables </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="table_list" class="col-md-12 col-sm-12 col-xs-12">
+    </div>
+</div>
+
+<div id="database_deletion_failure" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color:#e74c3c">
+        <h3 class="modal-title" style="color:white">Failure in deleting database</h3>
+      </div>
+      <div class="modal-body">
+        <p>This might due to the following reasons</p>
+        <ul>
+            <li> Database is online - wait or close the connection </li>
+            <li> Someone already deleted it - refresh the page </li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="connection_close_failure" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color:#e74c3c">
+        <h3 class="modal-title" style="color:white">Failure in close database connection</h3>
+      </div>
+      <div class="modal-body">
+        <p>This might due to the following reasons</p>
+        <ul>
+            <li> Unable to get database lock - database in use </li>
+            <li> Someone already closed it - refresh the page </li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="get_database_detials_failed" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color:#e74c3c">
+        <h3 class="modal-title" style="color:white">Failure in retrieve database information</h3>
+      </div>
+      <div class="modal-body">
+        <p>This might due to the following reasons</p>
+        <ul>
+            <li> This database not exists - refresh the page </li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock page_content %}

@@ -1,0 +1,33 @@
+<input hidden name="argc" value="{{ parameters|length }}">
+<div class="form-group">
+    <label class="control-label col-md-4 col-sm-3 col-xs-12">Name</label>
+    <div class="col-md-8 col-sm-9 col-xs-12">
+        <input name="name" class="form-control" placeholder="optional">
+    </div>
+</div>
+{% for param in parameters %}
+<div class="form-group">
+    <label class="control-label col-md-4 col-sm-3 col-xs-12">{{ param }}</label>
+    <div class="col-md-8 col-sm-9 col-xs-12">
+        <input required type="text" name="param_{{ forloop.counter0 }}" class="form-control">
+    </div>
+</div>
+{% endfor %}
+<div class="form-group">
+    <label class="control-label col-md-4 col-sm-3 col-xs-12">Add to queue</label>
+    <div class="col-md-8 col-sm-9 col-xs-12">
+        <div class="checkbox">
+            <input type="checkbox" name="to_queue" class="js-switch" />
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-4 col-sm-3 col-xs-3 pull-right">
+        <button type="submit" class="btn btn-success pull-right">Create</button>
+        <button type="reset" class="btn btn-warning pull-right">Reset</button>
+    </div>
+</div>
+<script>
+    var elem = document.querySelector('.js-switch');
+    var init = new Switchery(elem, { color: '#26B99A' });
+</script>

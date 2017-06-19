@@ -1,0 +1,44 @@
+<tr class="net_info_row" id="expanded_{{ internal_id }}">
+    <td colspan="5">
+        {% for key, value in json_dict.items %}
+            <p> {{ key }} : {{ value }} </p>
+        {% endfor %}
+        <p> Size : {{ size }} </p>
+        <button id="refresh_{{ internal_id }}" class="btn btn-success btn-sm">Refresh status</button>
+        <button id="delete_{{ internal_id }}" class="btn btn-danger btn-sm">Delete network</button>
+    </td>
+    <script>
+        $( "#refresh_{{ internal_id }}" ).click(function() {
+            NProgress.start();
+            $.ajax({
+                url: "{% url 'main:refresh-network-info' %}" ,
+                data: {
+                    "internal_id" : "{{ internal_id }}"
+                },
+                success: function(data) {
+                    $("#expanded_{{ internal_id }}").replaceWith(data);
+                } 
+            });
+            NProgress.done();
+        });
+        $( "#delete_{{ internal_id }}" ).click(function() {
+            NProgress.start();
+            $.ajax({
+                url: "{% url 'main:delete-network' %}" ,
+                data: {
+                    "internal_id" : "{{ internal_id }}"
+                },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.status=='success') {
+                        $("#datatable-responsive").DataTable().rows("#network_{{ internal_id }}").remove().draw();
+                        $("#top_tiles_container").hide().load("{% url 'main:dashboard' %} #top_tiles").fadeIn("slow");
+                    } else {
+                        $("#failure_in_deleting_network").modal("show");
+                    }
+                } 
+            });
+            NProgress.done();
+        });
+    </script>
+</tr>

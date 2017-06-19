@@ -1,0 +1,29 @@
+<tr class="db_info_row" id="expanded_{{ database.internal_id }}">
+    <td colspan="5">
+        <p> Comments : {{ database.comments }} </p>
+        <p> Date created : {{ database.created_date }} </p>
+        <p> Number of tables : {{ database.num_tables }} </p>
+        <p> Size : {{ size }} </p>
+        <button id="delete_{{ database.internal_id }}" class="btn btn-danger btn-sm">Delete database</button>
+    </td>
+    <script>
+        $( "#delete_{{ database.internal_id }}" ).click(function() {
+            NProgress.start();
+            $.ajax({
+                url: "{% url 'main:delete-database' %}" ,
+                data: {
+                    "internal_id" : "{{ database.internal_id }}"
+                },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.status=='success') {
+                        $("#datatable-responsive").DataTable().rows("#database_{{ database.internal_id }}").remove().draw();
+                    } else {
+                        $("#database_deletion_failure").modal('show');
+                    }
+                } 
+            });
+            NProgress.done();
+        });
+    </script>
+</tr>

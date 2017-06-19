@@ -1,0 +1,50 @@
+<div class="x_panel">            
+    <div class="x_title">
+        <h2>Availiable Tables<small>main/databases : {{ db_id }}</small></h2>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x-content">
+        <table id="table-list" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <td>
+                        Name
+                    </td>
+                    <td>
+                        Unique ID
+                    </td>
+                    <td>
+                        Last Modified
+                    </td>
+                    <td>
+                        Details
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for table in all_tables %}
+                    <tr id="table_{{ table.internal_id }}">
+                        <td>
+                            {{table.table_name}}
+                        </td>
+                        <td>
+                            {{table.internal_id}}
+                        </td>
+                        <td>
+                            {{database.last_modified}}
+                        </td>
+                        <td>
+                            <button id="button_{{ table.internal_id }}" class="btn btn-success btn-xs view_table_details" value="{{ table.internal_id }}"> 
+                                View Details </button>
+                            <button id="showdata_{{ table.internal_id }}" class="btn btn-success btn-xs show_data" value="{{ table.internal_id }}"> 
+                                View Data </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $("#table-list").DataTable();
+</script>
